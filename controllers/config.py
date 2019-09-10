@@ -26,6 +26,7 @@ class WxappConfig(http.Controller, BaseController):
                 return self.res_err(300)
 
             data = {
+                'dbname': request.env.cr.dbname,
                 'creatAt': entry.create_date,
                 'dateType': 0,
                 'id': entry.id,
@@ -35,6 +36,7 @@ class WxappConfig(http.Controller, BaseController):
                 'userId': entry.id,
                 'value': entry.get_config(key, sub_domain)
             }
+            data.update(entry.get_ext_config())
             return self.res_ok(data)
 
         except AttributeError:
@@ -42,4 +44,16 @@ class WxappConfig(http.Controller, BaseController):
 
         except Exception as e:
             _logger.exception(e)
-            return self.res_err(-1, e.name)
+            return self.res_err(-1, str(e))
+
+    @http.route('/<string:sub_domain>/config/vipLevel', auth='public', methods=['GET'])
+    def get_viplevel(self, sub_domain, key=None, **kwargs):
+        try:
+            ret, entry = self._check_domain(sub_domain)
+            if ret:return ret
+
+            return self.res_ok(entry.get_level())
+
+        except Exception as e:
+            _logger.exception(e)
+            return self.res_err(-1, str(e))

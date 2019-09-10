@@ -13,6 +13,7 @@ from . import address
 from . import order
 from . import notice
 from . import score
+from . import region
 
 
 from odoo.http import root, JsonRequest, HttpRequest
@@ -21,6 +22,9 @@ _logger = logging.getLogger(__name__)
 
 def get_request(self, httprequest):
     if 'Referer' in httprequest.headers and 'servicewechat.com' in httprequest.headers['Referer']:
+        lang = httprequest.session.context.get('lang','')
+        if lang!='zh-CN':
+            httprequest.session.context["lang"] = 'zh_CN'
         if httprequest.mimetype=="application/json":
             return HttpRequest(httprequest)
     if httprequest.args.get('jsonp'):

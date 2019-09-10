@@ -32,7 +32,7 @@ class WxappCategory(http.Controller, BaseController):
                 {
                     "dateAdd": each_category.create_date,
                     "dateUpdate": each_category.write_date,
-                    "icon": each_category.icon.static_link() if each_category.icon else '',
+                    "icon": each_category.get_icon_image() if each_category.icon else '',
                     "id": each_category.id,
                     "isUse": each_category.is_use,
                     "key": each_category.key,
@@ -48,4 +48,4 @@ class WxappCategory(http.Controller, BaseController):
 
         except Exception as e:
             _logger.exception(e)
-            return self.res_err(-1, e.name)
+            return self.res_err(-1, str(e))

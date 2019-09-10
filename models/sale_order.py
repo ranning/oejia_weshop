@@ -70,6 +70,10 @@ class SaleOrder(models.Model):
     def delivery(self):
         self.write({'customer_status': 'unconfirmed'})
 
+    @api.multi
+    def close_dialog(self):
+        return {'type': 'ir.actions.act_window_close'}
+
     def delivery_window(self):
         self.ensure_one()
         return {
@@ -88,15 +92,19 @@ class SaleOrder(models.Model):
         }
 
     @api.multi
-    def check_paid(self):
+    def action_paid(self):
         self.write({'customer_status': 'pending'})
+
+    @api.multi
+    def action_created(self):
+        pass
 
     @api.multi
     def check_pay_window(self):
         new_context = dict(self._context) or {}
         new_context['default_info'] = "此订单客户尚未在线支付，确认将其变为已支付状态？"
         new_context['default_model'] = 'sale.order'
-        new_context['default_method'] = 'check_paid'
+        new_context['default_method'] = 'action_paid'
         new_context['record_ids'] = [obj.id for obj in self]
         return {
             'name': u'确认订单已支付',
@@ -110,3 +118,15 @@ class SaleOrder(models.Model):
             'target': 'new'
         }
 
+
+    @api.multi
+    def action_cancel(self):
+        result = super(SaleOrder, self).action_cancel()
+        self.write({'customer_status': 'closed'})
+        return result
+
+    @api.multi
+    def action_draft(self):
+        result = super(SaleOrder, self).action_draft()
+        self.write({'customer_status': 'unpaid'})
+        return result
